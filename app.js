@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const routes = require('./routes/index');
@@ -11,11 +12,14 @@ mongoose.connect('mongodb://localhost:27017/node-mongodb-crud', {
 
 const app = express();
 
+// Enable CORS
+app.use(cors());
+
 // Serve static files
 app.use(express.static('public'));
 
 // Parse request bodies
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 // Routes
