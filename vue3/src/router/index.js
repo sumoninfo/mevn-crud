@@ -1,20 +1,43 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import {createRouter, createWebHistory} from 'vue-router'
+
+//Web route
+import WebLayout   from "@/views/web/Layout";
+import webRoutes   from "@/views/web/_routes";
+//Admin route
+import AdminRoutes from "@/views/admin/_routes";
+import AdminLayout from "@/views/admin/Layout";
+//Auth route
+import AuthRoutes  from "@/views/auth/_routes";
 
 const routes = [
+  //Web routing
   {
-    path: '/',
-    name: 'home',
-    component: HomeView
+    path     : '/',
+    name     : 'website',
+    component: WebLayout,
+    children : webRoutes
+  },
+  //Auth routing
+  {
+    path     : '/',
+    name     : 'Authentication',
+    component: WebLayout,
+    children : AuthRoutes
+  },
+  //Admin routing
+  {
+    path     : '/',
+    component: AdminLayout,
+    children : AdminRoutes,
+    meta     : {
+      requireAuth: true,
+    }
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
+    path     : "/:pathMatch(.*)*",
+    name     : "not-found",
+    component: () => import("@/components/NotFound.vue"),
+  },
 ]
 
 const router = createRouter({

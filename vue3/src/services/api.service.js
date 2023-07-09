@@ -1,11 +1,12 @@
-import axios      from 'axios';
-// import JwtService from "./jwt.service";
+import axios from 'axios';
+import JwtService from "./jwt.service";
 
 const ApiService = {
     init() {
-        axios.defaults.baseURL                                      = process.env.VUE_APP_API_URL + "/";
-        // axios.defaults.headers.common["Authorization"]              = `Bearer ${JwtService.getToken()}`;
-        // axios.defaults.headers.common["Authorization_RefreshToken"] = JwtService.getRefreshToken();
+        axios.defaults.baseURL = process.env.VUE_APP_API_URL + "/";
+        axios.defaults.headers.common["x-access-token"] = JwtService.getToken();
+        // axios.defaults.headers.common["Authorization"] = `Bearer ${JwtService.getToken()}`;
+        axios.defaults.headers.common["Authorization_RefreshToken"] = JwtService.getRefreshToken();
     },
 
     get(resource, params) {

@@ -26,10 +26,10 @@ window.Toast = Toast;
 
 //services
 import ApiService       from '@/services/api.service.js'
-// import AuthCheckService from "@/services/auth.service";
+import AuthCheckService from "@/services/auth.service";
 
 ApiService.init();
-// AuthCheckService.checkAuth();
+AuthCheckService.checkAuth();
 
 const app = createApp(App)
 
