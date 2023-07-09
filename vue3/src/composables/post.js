@@ -11,8 +11,18 @@ export default function handlePost() {
         return ApiService.post('/posts', data)
     }
 
+    const updatePost = (id, data) => {
+        return ApiService.update(`/posts/${id}`, data)
+    }
+
+    const deletePost = (id) => {
+        return ApiService.delete(`/posts/${id}`)
+    }
+
     return {
         fetchPosts,
-        storePost
+        storePost,
+        updatePost,
+        deletePost
     }
 }

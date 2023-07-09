@@ -1,50 +1,93 @@
 <template>
-  <section style="background-color: #eee;">
-    <div class="container py-5">
-      <form @submit.prevent="savePost">
-        <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Title</label>
-          <input v-model="formData.title" type="text" class="form-control" id="exampleInputEmail1"
-                 aria-describedby="emailHelp">
-        </div>
-        <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Content</label>
-          <input v-model="formData.content" type="text" class="form-control" id="exampleInputEmail1"
-                 aria-describedby="emailHelp">
-        </div>
-        <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Status</label>
-          <select v-model="formData.status" class="form-control">
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
-      <div class="row">
-        <div v-for="(post, index) in lists" class="col-md-12 col-lg-3 mb-3" :key="index">
-          <div class="card">
-            <!--            <img :src="post.image" style="height: 250px" class="card-img-top" :alt="post.name"/>-->
-            <div class="card-body">
-              <div class="d-flex justify-content-between">
-                <p class="small"><a href="#!" class="text-muted">{{ post.date }}</a></p>
-              </div>
-
-              <div class="d-flex justify-content-between mb-3">
-                <h5 class="mb-0">{{ post.title }}</h5>
-                <h6 class="mb-0">{{ post.content }}</h6>
-              </div>
-
-              <div class="d-flex justify-content-between mb-2">
-                <h6 class="text-dark mb-0">{{ $filters.upperCase(post.status) }}</h6>
-              </div>
+  <div class="container">
+    <div class="row mt-5">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Posts Table</h3>
+            <div class="card-tools">
+              <button id="openModal" type="button" class="btn btn-primary" data-bs-toggle="modal"
+                      data-bs-target="#postModal">
+                Add new
+              </button>
             </div>
           </div>
+
+          <div class="card-body table-responsive p-0">
+            <table class="table table-hover">
+              <tbody>
+              <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Content</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+              <template v-if="lists.length">
+                <tr v-for="(list, index) in lists" :key="list.id">
+                  <td>{{ ++index }}</td>
+                  <td>{{ list.title }}</td>
+                  <td>{{ list.date }}</td>
+                  <td>{{ list.content }}</td>
+                  <td>{{ $filters.upperCase(list.status) }}</td>
+                  <td>
+                    <a href="#" data-id="customers.id" @click="editModalWindow(list)">
+                      <i class="fa fa-edit blue"></i> Edit
+                    </a>
+                    |
+                    <a href="#" @click="postDelete(list._id)">
+                      <i class="fa fa-trash red"></i> Delete
+                    </a>
+                  </td>
+                </tr>
+              </template>
+              <template v-else>
+                <tr>
+                  <td class="text-center" colspan="6">No Data found!</td>
+                </tr>
+              </template>
+              </tbody>
+            </table>
+          </div>
         </div>
+
       </div>
-      <!--      <pagination v-if="lists.length>0" :pagination="table.pagination" @paginate="getList" :offset="5"/>-->
     </div>
-  </section>
+  </div>
+  <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="postModalLabel">{{ isEdit ? "Edit" : "Add" }}</h5>
+          <button type="button" id="close-modal" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form @submit.prevent="saveUpdatePost">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title</label>
+              <input v-model="formData.title" type="text" class="form-control" id="title">
+            </div>
+            <div class="mb-3">
+              <label for="content" class="form-label">Content</label>
+              <input v-model="formData.content" type="text" class="form-control" id="content">
+            </div>
+            <div class="mb-3">
+              <label for="status" class="form-label">Status</label>
+              <select id="status" v-model="formData.status" class="form-control">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">{{ isEdit ? "Update" : "Save" }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -53,14 +96,14 @@ import NotificationService from "@/services/notification.service";
 import handlePost from "@/composables/post";
 // import Pagination          from "@/components/Pagination.vue";
 
-const {fetchPosts, storePost} = handlePost();
+const {fetchPosts, storePost, updatePost, deletePost} = handlePost();
 const lists = ref([])
+const isEdit = ref(false)
 
 const formData = ref({
-  title: '',
+  title: "",
   content: "",
-  status: "",
-  date: "",
+  status: ""
 })
 const table = ref({
   search: '',
@@ -77,7 +120,6 @@ const getList = () => {
     page: table.value.pagination.current_page,
   };
   fetchPosts(params).then(({data}) => {
-    console.log(data.data, 'data')
     lists.value = data.data
     // const {links, path, ...meta} = data.meta;
     // table.value.pagination       = meta
@@ -86,9 +128,26 @@ const getList = () => {
   })
 }
 
-const savePost = () => {
-  storePost(formData.value).then(({data}) => {
-    console.log(data)
+const saveUpdatePost = () => {
+  const res = isEdit.value ? updatePost(formData.value._id, formData.value) : storePost(formData.value)
+  res.then(({data}) => {
+    getList()
+    formReset()
+    isEdit.value = false;
+    document.getElementById('close-modal').click()
+    NotificationService.success(data.message);
+  }).catch(error => {
+    NotificationService.error(error.response.data.message);
+  })
+}
+
+const editModalWindow = (list) => {
+  isEdit.value = true
+  formData.value = list
+  document.getElementById('openModal').click()
+}
+const postDelete = (id) => {
+  deletePost(id).then(({data}) => {
     getList()
     NotificationService.success(data.message);
   }).catch(error => {
@@ -96,7 +155,17 @@ const savePost = () => {
   })
 }
 
+const formReset = () => {
+  formData.value = {
+    title: "",
+    content: "",
+    status: "",
+    date: "",
+  }
+}
+
 onMounted(() => {
+  isEdit.value = false;
   getList()
 })
 </script>
