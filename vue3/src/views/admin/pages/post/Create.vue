@@ -29,6 +29,13 @@
                     <option v-for="author in authors" :value="author._id">{{ author.title }}</option>
                   </select>
                 </div>
+
+                <div class="mb-3">
+                  <label for="categories_ids" class="form-label">Categories</label>
+                  <select multiple id="categories_ids" v-model="formData.categories_ids" class="form-control">
+                    <option v-for="category in categories" :value="category._id">{{ category.title }}</option>
+                  </select>
+                </div>
                 <div class="mb-3">
                   <label for="status" class="form-label">Status</label>
                   <select id="status" v-model="formData.status" class="form-control">
@@ -55,10 +62,13 @@ import NotificationService from "@/services/notification.service";
 import handlePost from "@/composables/post";
 import handleAuthor from "@/composables/author";
 import {useRoute, useRouter} from "vue-router";
+import handleCategory from "@/composables/category";
 
 const {fetchPost, storePost, updatePost} = handlePost();
 const {fetchAuthors} = handleAuthor();
+const {fetchCategories} = handleCategory();
 const authors = ref([])
+const categories = ref([])
 const isEdit = ref(false)
 const router = useRouter()
 const route = useRoute()
@@ -66,12 +76,21 @@ const formData = ref({
   title: "",
   content: "",
   author_id: "",
+  categories_ids: [],
   status: ""
 })
 
-const getAuthor = () => {
+const getAuthors = () => {
   fetchAuthors().then(({data}) => {
     authors.value = data.data
+  }).catch(error => {
+    NotificationService.error(error.response.data.message);
+  })
+}
+
+const getCategories = () => {
+  fetchCategories().then(({data}) => {
+    categories.value = data.data
   }).catch(error => {
     NotificationService.error(error.response.data.message);
   })
@@ -107,7 +126,8 @@ const formReset = () => {
 }
 
 onMounted(() => {
-  getAuthor()
+  getAuthors()
+  getCategories()
 
   if (route.params.postId) {
     isEdit.value = true;
