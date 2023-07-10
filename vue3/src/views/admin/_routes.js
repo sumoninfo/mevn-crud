@@ -14,6 +14,14 @@ const AdminRoutes = [
         meta: {
             title: 'Admin Category'
         }
+    },
+    {
+        path: '/post',
+        name: 'AdminPost',
+        component: () => import('./pages/post/Index.vue'),
+        meta: {
+            title: 'Admin Post'
+        }
     }
 ];
 

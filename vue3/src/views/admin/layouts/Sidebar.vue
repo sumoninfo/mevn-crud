@@ -9,9 +9,15 @@
           </router-link>
         </li>
         <li class="nav-item">
-          <router-link :to="{name:'AdminCategory'}" class="nav-link active">
+          <router-link :to="{name:'AdminCategory'}" class="nav-link">
             <i class="fas fa-home"></i>
             Category
+          </router-link>
+        </li>
+        <li class="nav-item">
+          <router-link :to="{name:'AdminPost'}" class="nav-link">
+            <i class="fas fa-home"></i>
+            Post
           </router-link>
         </li>
       </ul>
