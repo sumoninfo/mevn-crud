@@ -6,8 +6,12 @@
           <form @submit.prevent="registerSubmit()" class="needs-validation" novalidate>
             <h3 class="text-center mb-4 text-primary">Register</h3>
             <div class="mb-3">
+              <input v-model="form.name" type="text" class="form-control "
+                     id="name" required placeholder="Full Name">
+            </div>
+            <div class="mb-3">
               <input v-model="form.username" type="text" class="form-control "
-                     id="name" required placeholder="USERNAME">
+                     id="username" required placeholder="USERNAME">
             </div>
             <div class="mb-3">
               <input v-model="form.email" type="email" class="form-control"
@@ -47,6 +51,7 @@ import {ref} from "vue";
 import {useRouter} from "vue-router";
 
 const form = ref({
+  name: "",
   username: "",
   email: "",
   password: "",
@@ -56,15 +61,14 @@ const form = ref({
 const errors = ref([])
 const router = useRouter()
 const registerSubmit = () => {
-  register(form.value).then((res) => {
-    console.log(res, 'res')
-    // errors.value = []
-    // NotificationService.success(data.message);
-    // router.push({name: "LoginPage"})
+  register(form.value).then(({data}) => {
+    errors.value = []
+    NotificationService.success(data.message);
+    router.push({name: "LoginPage"})
   }).catch(error => {
     console.log(error, 'error')
-    // errors.value = error.response.data.errors;
-    // NotificationService.error(error.response.data.message);
+    errors.value = error.response.data.errors;
+    NotificationService.error(error.response.data.message);
   })
 }
 </script>

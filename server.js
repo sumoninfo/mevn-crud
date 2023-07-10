@@ -48,7 +48,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // parse requests of content-type - application/x-www-form-urlencoded
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 const db = require("./app/models");
 const Role = db.role;
@@ -69,12 +69,13 @@ db.mongoose
 
 // simple route
 app.get("/", (req, res) => {
-    res.json({ message: "Welcome to bezkoder application." });
+    res.json({message: "Welcome to MEVN application."});
 });
 
 // routes
 require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
+require("./app/routes/category.routes")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;

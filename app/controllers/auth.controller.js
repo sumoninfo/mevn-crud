@@ -9,6 +9,7 @@ const bcrypt = require("bcryptjs");
 exports.signup = async (req, res) => {
     try {
         const user = new User({
+            name: req.body.name,
             username: req.body.username,
             email: req.body.email,
             password: bcrypt.hashSync(req.body.password, 8)
@@ -25,8 +26,7 @@ exports.signup = async (req, res) => {
         }
 
         await user.save();
-        res.send({message: "User was registered successfully!"});
-        //res.status(200).json({status: true, message: 'User was registered successfully!', data: user});
+        res.status(200).json({status: true, message: 'User registration successfully!', data: user});
     } catch (err) {
         console.log(err, 'err')
         res.status(500).json({status: false, message: err});
@@ -61,14 +61,6 @@ exports.signin = async (req, res) => {
 
         const authorities = user.roles.map(role => "ROLE_" + role.name.toUpperCase());
 
-        // res.status(200).send({
-        //     id: user._id,
-        //     username: user.username,
-        //     email: user.email,
-        //     roles: authorities,
-        //     accessToken: token
-        // });
-
         res.status(200).json({
             status: true, message: 'User login successfully!', data: {
                 access_token: token,
@@ -84,7 +76,3 @@ exports.signin = async (req, res) => {
         res.status(500).json({status: false, message: err});
     }
 };
-
-exports.user = async (req, res) => {
-
-}

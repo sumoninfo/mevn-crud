@@ -7,7 +7,7 @@ exports.userBoard = (req, res) => {
 };
 
 exports.logout = (req, res) => {
-    res.status(200).json({ status: true, message: 'User logout!', data: '' });
+    res.status(200).json({status: true, message: 'User logout!'});
 };
 
 exports.adminBoard = (req, res) => {

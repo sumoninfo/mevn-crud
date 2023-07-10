@@ -8,6 +8,12 @@
             Dashboard
           </router-link>
         </li>
+        <li class="nav-item">
+          <router-link :to="{name:'AdminCategory'}" class="nav-link active">
+            <i class="fas fa-home"></i>
+            Category
+          </router-link>
+        </li>
       </ul>
     </div>
   </nav>

@@ -1,6 +1,7 @@
 import router from "@/router";
 import * as JwtService from "@/services/jwt.service";
 import {nextTick} from "vue";
+import ApiService from "@/services/api.service";
 
 const AuthCheckService = {
     checkAuth() {
@@ -11,6 +12,16 @@ const AuthCheckService = {
 
             if (!to.matched.some(record => record.meta.requireAuth)) {
                 next();
+            }
+
+            if (JwtService.getToken()) {
+                ApiService.get('/user').then(response => {
+                    //store.commit("auth/SETUSER", response.data.data);
+                    next()
+                }).catch(error => {
+                    JwtService.destroyToken();
+                    router.push({'name': 'LoginPage'})
+                })
             }
 
             if (!JwtService.getToken()) {
