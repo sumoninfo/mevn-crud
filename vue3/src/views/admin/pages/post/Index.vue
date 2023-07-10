@@ -18,6 +18,7 @@
               <tbody>
               <tr>
                 <th>#</th>
+                <th>Author</th>
                 <th>Title</th>
                 <th>Date</th>
                 <th>Content</th>
@@ -27,6 +28,7 @@
               <template v-if="lists.length">
                 <tr v-for="(list, index) in lists" :key="list.id">
                   <td>{{ ++index }}</td>
+                  <td>{{ list.author ? list.author.title : "" }}</td>
                   <td>{{ list.title }}</td>
                   <td>{{ list.date }}</td>
                   <td>{{ list.content }}</td>
@@ -44,7 +46,7 @@
               </template>
               <template v-else>
                 <tr>
-                  <td class="text-center" colspan="6">No Data found!</td>
+                  <td class="text-center" colspan="7">No Data found!</td>
                 </tr>
               </template>
               </tbody>
@@ -73,12 +75,19 @@
               <input v-model="formData.content" type="text" class="form-control" id="content">
             </div>
             <div class="mb-3">
+              <label for="author_id" class="form-label">Author</label>
+              <select id="author_id" v-model="formData.author_id" class="form-control">
+                <option v-for="author in authors" :value="author._id">{{ author.title }}</option>
+              </select>
+            </div>
+            <div class="mb-3">
               <label for="status" class="form-label">Status</label>
               <select id="status" v-model="formData.status" class="form-control">
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
-            </div>
+            </div
+            >
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -94,15 +103,19 @@
 import {onMounted, ref} from "vue";
 import NotificationService from "@/services/notification.service";
 import handlePost from "@/composables/post";
+import handleAuthor from "@/composables/author";
 // import Pagination          from "@/components/Pagination.vue";
 
 const {fetchPosts, storePost, updatePost, deletePost} = handlePost();
+const {fetchAuthors} = handleAuthor();
 const lists = ref([])
+const authors = ref([])
 const isEdit = ref(false)
 
 const formData = ref({
   title: "",
   content: "",
+  author_id: "",
   status: ""
 })
 const table = ref({
@@ -128,6 +141,14 @@ const getList = () => {
   })
 }
 
+const getAuthor = () => {
+  fetchAuthors().then(({data}) => {
+    authors.value = data.data
+  }).catch(error => {
+    NotificationService.error(error.response.data.message);
+  })
+}
+
 const saveUpdatePost = () => {
   const res = isEdit.value ? updatePost(formData.value._id, formData.value) : storePost(formData.value)
   res.then(({data}) => {
@@ -144,6 +165,7 @@ const saveUpdatePost = () => {
 const editModalWindow = (list) => {
   isEdit.value = true
   formData.value = list
+  formData.value.author_id = list.author._id
   document.getElementById('openModal').click()
 }
 const postDelete = (id) => {
@@ -167,5 +189,6 @@ const formReset = () => {
 onMounted(() => {
   isEdit.value = false;
   getList()
+  getAuthor()
 })
 </script>

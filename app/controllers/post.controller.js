@@ -1,12 +1,15 @@
 const db = require("../models");
 const Post = db.post;
+const Author = db.author;
 const handleError = (res, statusCode, message) => {
     res.status(statusCode).json({status: false, message});
 };
 
 exports.index = async (req, res) => {
     try {
-        const posts = await Post.find({});
+        const posts = await Post.find()
+            .populate('author', '_id -status')
+            .select('title content status date author');
         res.status(200).json({status: true, message: 'Posts Fetched!', data: posts});
     } catch (err) {
         console.error(err);
@@ -15,10 +18,20 @@ exports.index = async (req, res) => {
 };
 
 exports.store = async (req, res) => {
-    const data = req.body;
-    const model = new Post(data);
-
     try {
+        const {author_id, ...data} = req.body;
+
+        // Check if the author exists
+        const author = await Author.findById(author_id);
+        if (!author) {
+            return res.status(404).send({message: 'Author not found'});
+        }
+
+        // Create a new post and associate it with the author
+        const model = new Post({
+            ...data,
+            author: author._id
+        });
         const post = await model.save();
         res.status(200).json({status: true, message: 'Post Created!', data: post});
     } catch (err) {
@@ -46,10 +59,16 @@ exports.show = async (req, res) => {
 
 exports.update = async (req, res) => {
     const id = req.params.id;
-    const data = req.body;
+    const {author_id, ...data} = req.body;
 
     try {
-        const post = await Post.findByIdAndUpdate(id, data, {new: true, runValidators: true});
+        // Check if the author exists
+        const author = await Author.findById(author_id);
+        if (!author) {
+            return res.status(404).send({message: 'Author not found'});
+        }
+
+        const post = await Post.findByIdAndUpdate(id, {...data, author: author._id}, {new: true, runValidators: true});
 
         if (!post) {
             handleError(res, 404, 'Post not found');

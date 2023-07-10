@@ -15,6 +15,10 @@ const Post = mongoose.model(
         date: {
             type: Date,
             default: Date.now()
+        },
+        author: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Author'
         }
     })
 );
