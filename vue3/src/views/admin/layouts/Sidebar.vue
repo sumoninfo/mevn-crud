@@ -9,6 +9,12 @@
           </router-link>
         </li>
         <li class="nav-item">
+          <router-link :to="{name:'AdminAuthor'}" class="nav-link">
+            <i class="fas fa-home"></i>
+            Author
+          </router-link>
+        </li>
+        <li class="nav-item">
           <router-link :to="{name:'AdminCategory'}" class="nav-link">
             <i class="fas fa-home"></i>
             Category
@@ -24,3 +30,5 @@
     </div>
   </nav>
 </template>
+<script setup>
+</script>

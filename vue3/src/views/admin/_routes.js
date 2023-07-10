@@ -8,6 +8,14 @@ const AdminRoutes = [
         }
     },
     {
+        path: '/author',
+        name: 'AdminAuthor',
+        component: () => import('./pages/author/Index.vue'),
+        meta: {
+            title: 'Admin Author'
+        }
+    },
+    {
         path: '/category',
         name: 'AdminCategory',
         component: () => import('./pages/category/Index.vue'),
