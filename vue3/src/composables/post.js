@@ -11,6 +11,10 @@ export default function handlePost() {
         return ApiService.post('/posts', data)
     }
 
+    const fetchPost = (id) => {
+        return ApiService.get(`/posts/${id}`)
+    }
+
     const updatePost = (id, data) => {
         return ApiService.update(`/posts/${id}`, data)
     }
@@ -22,6 +26,7 @@ export default function handlePost() {
     return {
         fetchPosts,
         storePost,
+        fetchPost,
         updatePost,
         deletePost
     }

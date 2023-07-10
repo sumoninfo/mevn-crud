@@ -30,6 +30,22 @@ const AdminRoutes = [
         meta: {
             title: 'Admin Post'
         }
+    },
+    {
+        path: '/post',
+        name: 'CreatePost',
+        component: () => import('./pages/post/Create.vue'),
+        meta: {
+            title: 'Create Post'
+        }
+    },
+    {
+        path: '/post/:postId/edit',
+        name: 'EditPost',
+        component: () => import('./pages/post/Create.vue'),
+        meta: {
+            title: 'Edit Post'
+        }
     }
 ];
 

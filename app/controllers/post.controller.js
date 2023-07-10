@@ -44,7 +44,9 @@ exports.show = async (req, res) => {
     const id = req.params.id;
 
     try {
-        const post = await Post.findById(id);
+        const post = await Post.findById(id)
+            .populate('author', '_id -status')
+            .select('title content status date author');
         if (!post) {
             handleError(res, 404, 'Post not found');
             return;
