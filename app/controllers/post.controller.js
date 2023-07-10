@@ -2,6 +2,7 @@ const db = require("../models");
 const Post = db.post;
 const Author = db.author;
 const CategoryPost = db.category_post;
+const Comment = db.comment;
 const handleError = (res, statusCode, message) => {
     res.status(statusCode).json({status: false, message});
 };
@@ -20,7 +21,7 @@ exports.index = async (req, res) => {
 
 exports.store = async (req, res) => {
     try {
-        const {author_id, categories_ids, ...data} = req.body;
+        const {author_id, categories_ids, comment, ...data} = req.body;
 
         // Check if the author exists
         const author = await Author.findById(author_id);
@@ -45,6 +46,12 @@ exports.store = async (req, res) => {
             await categoryPost.save();
         }
 
+        const commentOnBook = await Comment.create({
+            body: comment,
+            doc: post._id,
+            docModel: 'Post'
+        });
+
         res.status(200).json({status: true, message: 'Post Created!', data: post});
     } catch (err) {
         console.error(err);
@@ -58,6 +65,9 @@ exports.show = async (req, res) => {
     try {
         const post = await Post.findById(id)
             .populate('author', '_id -status')
+            .populate({
+                path: 'comments', model: Comment
+            })
             // .populate({
             //     path: 'category_post', // Update this to match the field name in your Post model
             //     populate: {

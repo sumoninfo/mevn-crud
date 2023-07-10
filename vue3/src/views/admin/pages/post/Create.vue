@@ -43,6 +43,10 @@
                     <option value="inactive">Inactive</option>
                   </select>
                 </div>
+                <div class="mb-3">
+                  <label for="comment" class="form-label">Comment</label>
+                  <textarea v-model="formData.comment" type="text" class="form-control" id="comment"></textarea>
+                </div>
               </div>
               <div class="">
                 <button type="button" class="btn btn-secondary m-2" data-bs-dismiss="modal">Close</button>
@@ -77,7 +81,8 @@ const formData = ref({
   content: "",
   author_id: "",
   categories_ids: [],
-  status: ""
+  status: "",
+  comment: ""
 })
 
 const getAuthors = () => {
