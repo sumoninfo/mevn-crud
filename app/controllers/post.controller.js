@@ -12,34 +12,41 @@ exports.index = async (req, res) => {
     const reqPage = parseInt(req.query.page) || 1;  // Current page number
     const pageSize = parseInt(req.query.per_page) || 10;  // Number of items per page
 
-    try {
-        const result = await Post.paginate({}, { page: reqPage, limit: pageSize })
-            .populate({
+    const options = {
+        page: reqPage,
+        limit: pageSize,
+        populate: [
+            {
                 path: 'author',
                 select: '_id -status'
-            })
-            .populate({
+            },
+            {
                 path: 'categories',
                 populate: {
                     path: 'categoryId',
                     select: 'title'
                 }
-            })
-            .populate({
+            },
+            {
                 path: 'tags',
                 populate: {
                     path: 'tagId',
                     select: 'title'
                 }
-            })
-            .populate({
+            },
+            {
                 path: 'comments',
                 populate: {
                     path: 'commentable',
-                    select: 'body'
+                    select: 'comment'
                 }
-            })
-            .select('title content status date author');
+            }
+        ],
+        select: 'title content status date author'
+    };
+
+    try {
+        const result = await Post.paginate({}, options);
 
         const {docs, total, limit, page, pages} = result;
         // Prepare the meta keys
