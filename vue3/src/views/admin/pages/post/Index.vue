@@ -26,7 +26,7 @@
               </tr>
               <template v-if="lists.length">
                 <tr v-for="(list, index) in lists" :key="list.id">
-                  <td>{{ ++index }}</td>
+                  <td>{{ table.pagination.from + index }}</td>
                   <td>{{ list.author ? list.author.title : "" }}</td>
                   <td>{{ list.title }}</td>
                   <td>{{ $filters.dateFormat(list.date) }}</td>

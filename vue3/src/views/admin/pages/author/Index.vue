@@ -24,7 +24,7 @@
               </tr>
               <template v-if="lists.length">
                 <tr v-for="(list, index) in lists" :key="list.id">
-                  <td>{{ ++index }}</td>
+                  <td>{{ table.pagination.from + index }}</td>
                   <td>{{ list.title }}</td>
                   <td>{{ $filters.upperCase(list.status) }}</td>
                   <td>
