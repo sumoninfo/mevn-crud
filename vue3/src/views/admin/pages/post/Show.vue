@@ -51,7 +51,7 @@
               <div class="mb-3">
                 <label for="comment" class="form-label">Comments:
                   <span v-for="(comment, index) in formData.comments">
-                        {{ comment.body }},
+                        {{ comment.comment }},
                     </span>
                 </label>
               </div>

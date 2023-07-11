@@ -1,6 +1,6 @@
 const {Schema, model} = require('mongoose');
 const commentSchema = new Schema({
-    body: {
+    comment: {
         type: String,
         required: true
     },

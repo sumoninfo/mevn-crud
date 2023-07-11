@@ -1,9 +1,15 @@
 const {Schema, model} = require('mongoose');
+const mongoosePaginate = require("mongoose-paginate");
+
 const categorySchema = new Schema({
-    title: String,
+    title: {
+        type: String,
+        required: true
+    },
     status: {
         type: String,
-        enum: ['active', 'inactive']
+        enum: ['active', 'inactive'],
+        default: 'active'
     },
 }, {
     toJSON: {virtuals: true}
@@ -15,6 +21,7 @@ categorySchema.virtual('posts', {
     foreignField: 'categoryId'
 });
 
+categorySchema.plugin(mongoosePaginate);
 
 const Category = model('Category', categorySchema);
 

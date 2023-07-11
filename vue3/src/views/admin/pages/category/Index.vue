@@ -45,9 +45,9 @@
               </template>
               </tbody>
             </table>
+            <pagination v-if="lists.length>0" :pagination="table.pagination" @paginate="getList" :offset="5"/>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -62,14 +62,22 @@
           <div class="modal-body">
             <div class="mb-3">
               <label for="title" class="form-label">Title</label>
-              <input v-model="formData.title" type="text" class="form-control" id="title">
+              <input :class="{ 'is-invalid': errors['title'] }" v-model="formData.title" type="text"
+                     class="form-control" id="title">
+              <div v-if="errors['title']" class="invalid-feedback">
+                {{ errors['title'].message }}
+              </div>
             </div>
             <div class="mb-3">
               <label for="status" class="form-label">Status</label>
-              <select id="status" v-model="formData.status" class="form-control">
+              <select :class="{ 'is-invalid': errors['status'] }" id="status" v-model="formData.status"
+                      class="form-control">
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
+              <div v-if="errors['status']" class="invalid-feedback">
+                {{ errors['status'].message }}
+              </div>
             </div>
           </div>
           <div class="modal-footer">
@@ -86,12 +94,12 @@
 import {onMounted, ref} from "vue";
 import NotificationService from "@/services/notification.service";
 import handleCategory from "@/composables/category";
-// import Pagination          from "@/components/Pagination.vue";
+import Pagination from "@/components/Pagination.vue";
 
 const {fetchCategories, storeCategory, updateCategory, deleteCategory} = handleCategory();
 const lists = ref([])
 const isEdit = ref(false)
-
+const errors = ref([])
 const formData = ref({
   title: "",
   content: "",
@@ -112,9 +120,8 @@ const getList = () => {
     page: table.value.pagination.current_page,
   };
   fetchCategories(params).then(({data}) => {
-    lists.value = data.data
-    // const {links, path, ...meta} = data.meta;
-    // table.value.pagination       = meta
+    lists.value = data.data.data
+    table.value.pagination = data.data.meta
   }).catch(error => {
     NotificationService.error(error.response.data.message);
   })
@@ -123,13 +130,16 @@ const getList = () => {
 const saveUpdateCategory = () => {
   const res = isEdit.value ? updateCategory(formData.value._id, formData.value) : storeCategory(formData.value)
   res.then(({data}) => {
+    errors.value = []
     getList()
     formReset()
     isEdit.value = false;
     document.getElementById('close-modal').click()
     NotificationService.success(data.message);
   }).catch(error => {
-    NotificationService.error(error.response.data.message);
+    const resError = error.response.data.message.errors ? error.response.data.message : error.response.data;
+    errors.value = resError.errors
+    NotificationService.error(resError.message);
   })
 }
 

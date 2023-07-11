@@ -9,9 +9,15 @@ const handleError = (res, statusCode, message) => {
 };
 
 exports.index = async (req, res) => {
+    const reqPage = parseInt(req.query.page) || 1;  // Current page number
+    const pageSize = parseInt(req.query.per_page) || 10;  // Number of items per page
+
     try {
-        const posts = await Post.find()
-            .populate('author', '_id -status')
+        const result = await Post.paginate({}, { page: reqPage, limit: pageSize })
+            .populate({
+                path: 'author',
+                select: '_id -status'
+            })
             .populate({
                 path: 'categories',
                 populate: {
@@ -34,7 +40,24 @@ exports.index = async (req, res) => {
                 }
             })
             .select('title content status date author');
-        res.status(200).json({status: true, message: 'Posts Fetched!', data: posts});
+
+        const {docs, total, limit, page, pages} = result;
+        // Prepare the meta keys
+        const paginationMeta = {
+            from: (page - 1) * limit + 1,
+            to: (page - 1) * limit + docs.length,
+            current_page: page,
+            per_page: limit,
+            total: total,
+            last_page: pages
+        };
+
+        res.status(200).json({
+            status: true, message: 'Posts Fetched!', data: {
+                data: docs,
+                meta: paginationMeta
+            }
+        });
     } catch (err) {
         console.error(err);
         handleError(res, 500, err);
@@ -48,7 +71,7 @@ exports.store = async (req, res) => {
         // Check if the author exists
         const author = await Author.findById(author_id);
         if (!author) {
-            return res.status(404).send({message: 'Author not found'});
+            return handleError(res, 404, 'Author not found');
         }
 
         // Create a new post and associate it with the author
@@ -79,7 +102,7 @@ exports.store = async (req, res) => {
         }
 
         const commentOnBook = await Comment.create({
-            body: comment,
+            comment,
             commentable: post._id,
             commentableType: 'Post'
         });
@@ -87,7 +110,7 @@ exports.store = async (req, res) => {
         res.status(200).json({status: true, message: 'Post Created!', data: post});
     } catch (err) {
         console.error(err);
-        handleError(res, 500, 'Internal server error');
+        handleError(res, 500, err);
     }
 };
 
@@ -179,7 +202,7 @@ exports.update = async (req, res) => {
         await Comment.deleteMany({commentable: id});
 
         const commentOnBook = await Comment.create({
-            body: comment,
+            comment,
             commentable: post._id,
             commentableType: 'Post'
         });
@@ -190,7 +213,7 @@ exports.update = async (req, res) => {
             res.status(400).json({status: false, message: 'Validation error', errors: err.errors});
         } else {
             console.error(err);
-            handleError(res, 500, 'Internal server error');
+            handleError(res, 500, err);
         }
     }
 };
@@ -218,6 +241,6 @@ exports.delete = async (req, res) => {
         res.status(200).json({status: true, message: 'Post deleted'});
     } catch (err) {
         console.error(err);
-        handleError(res, 500, 'Internal server error');
+        handleError(res, 500, err);
     }
 };

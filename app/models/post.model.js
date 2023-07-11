@@ -1,4 +1,6 @@
 const {Schema, model} = require('mongoose');
+const mongoosePaginate = require("mongoose-paginate");
+
 const postSchema = new Schema({
     title: {
         type: String,
@@ -41,6 +43,7 @@ postSchema.virtual('comments', {
     foreignField: 'commentable',
 });
 
+postSchema.plugin(mongoosePaginate);
 const Post = model('Post', postSchema);
 
 module.exports = Post

@@ -54,6 +54,7 @@
               </template>
               </tbody>
             </table>
+            <pagination v-if="lists.length>0" :pagination="table.pagination" @paginate="getList" :offset="5"/>
           </div>
         </div>
       </div>
@@ -65,7 +66,7 @@
 import {onMounted, ref} from "vue";
 import NotificationService from "@/services/notification.service";
 import handlePost from "@/composables/post";
-// import Pagination          from "@/components/Pagination.vue";
+import Pagination from "@/components/Pagination.vue";
 
 const {fetchPosts, deletePost} = handlePost();
 const lists = ref([])
@@ -85,9 +86,8 @@ const getList = () => {
     page: table.value.pagination.current_page,
   };
   fetchPosts(params).then(({data}) => {
-    lists.value = data.data
-    // const {links, path, ...meta} = data.meta;
-    // table.value.pagination       = meta
+    lists.value = data.data.data
+    table.value.pagination = data.data.meta
   }).catch(error => {
     NotificationService.error(error.response.data.message);
   })

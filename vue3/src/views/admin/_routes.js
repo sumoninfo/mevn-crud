@@ -40,7 +40,7 @@ const AdminRoutes = [
         }
     },
     {
-        path: '/post',
+        path: '/post/create',
         name: 'CreatePost',
         component: () => import('./pages/post/Create.vue'),
         meta: {
