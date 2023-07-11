@@ -2,6 +2,7 @@ const db = require("../models");
 const Post = db.post;
 const Author = db.author;
 const CategoryPost = db.category_post;
+const TagPost = db.tag_post;
 const Comment = db.comment;
 const handleError = (res, statusCode, message) => {
     res.status(statusCode).json({status: false, message});
@@ -11,17 +12,38 @@ exports.index = async (req, res) => {
     try {
         const posts = await Post.find()
             .populate('author', '_id -status')
+            .populate({
+                path: 'categories',
+                populate: {
+                    path: 'categoryId',
+                    select: 'title'
+                }
+            })
+            .populate({
+                path: 'tags',
+                populate: {
+                    path: 'tagId',
+                    select: 'title'
+                }
+            })
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'commentable',
+                    select: 'body'
+                }
+            })
             .select('title content status date author');
         res.status(200).json({status: true, message: 'Posts Fetched!', data: posts});
     } catch (err) {
         console.error(err);
-        handleError(res, 500, 'Internal server error');
+        handleError(res, 500, err);
     }
 };
 
 exports.store = async (req, res) => {
     try {
-        const {author_id, categories_ids, comment, ...data} = req.body;
+        const {author_id, categories_ids, tags_ids, comment, ...data} = req.body;
 
         // Check if the author exists
         const author = await Author.findById(author_id);
@@ -39,17 +61,27 @@ exports.store = async (req, res) => {
         // Create the relationships in the CategoryPost collection
         for (const categoryId of categories_ids) {
             const categoryPost = new CategoryPost({
-                post: post._id,
-                category: categoryId
+                postId: post._id,
+                categoryId: categoryId
             });
 
             await categoryPost.save();
         }
 
+        // Create the relationships in the TagPost collection
+        for (const tagId of tags_ids) {
+            const tagPost = new TagPost({
+                postId: post._id,
+                tagId: tagId
+            });
+
+            await tagPost.save();
+        }
+
         const commentOnBook = await Comment.create({
             body: comment,
-            doc: post._id,
-            docModel: 'Post'
+            commentable: post._id,
+            commentableType: 'Post'
         });
 
         res.status(200).json({status: true, message: 'Post Created!', data: post});
@@ -66,15 +98,26 @@ exports.show = async (req, res) => {
         const post = await Post.findById(id)
             .populate('author', '_id -status')
             .populate({
-                path: 'comments', model: Comment
+                path: 'categories',
+                populate: {
+                    path: 'categoryId',
+                    select: 'title'
+                }
             })
-            // .populate({
-            //     path: 'category_post', // Update this to match the field name in your Post model
-            //     populate: {
-            //         path: 'category',
-            //         select: 'name'
-            //     }
-            // })
+            .populate({
+                path: 'tags',
+                populate: {
+                    path: 'tagId',
+                    select: 'title'
+                }
+            })
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'commentable',
+                    select: 'body'
+                }
+            })
             .select('title content status date author');
         if (!post) {
             handleError(res, 404, 'Post not found');
@@ -90,7 +133,7 @@ exports.show = async (req, res) => {
 
 exports.update = async (req, res) => {
     const id = req.params.id;
-    const {author_id, categories_ids, ...data} = req.body;
+    const {author_id, categories_ids, tags_ids, comment, ...data} = req.body;
 
     try {
         // Check if the author exists
@@ -107,17 +150,39 @@ exports.update = async (req, res) => {
         }
 
         // Delete existing relationships in the CategoryPost collection
-        await CategoryPost.deleteMany({post: id});
+        await CategoryPost.deleteMany({postId: id});
 
         // Create new relationships in the CategoryPost collection
         for (const categoryId of categories_ids) {
             const categoryPost = new CategoryPost({
-                post: id,
-                category: categoryId
+                postId: id,
+                categoryId: categoryId
             });
 
             await categoryPost.save();
         }
+
+        // Delete existing relationships in the CategoryPost collection
+        await TagPost.deleteMany({postId: id});
+
+        // Create new relationships in the TagPost collection
+        for (const tagId of tags_ids) {
+            const tagPost = new TagPost({
+                postId: id,
+                tagId: tagId
+            });
+
+            await tagPost.save();
+        }
+
+        // Delete existing relationships in the CategoryPost collection
+        await Comment.deleteMany({commentable: id});
+
+        const commentOnBook = await Comment.create({
+            body: comment,
+            commentable: post._id,
+            commentableType: 'Post'
+        });
 
         res.status(200).json({status: true, message: 'Post updated', data: post});
     } catch (err) {
@@ -142,7 +207,13 @@ exports.delete = async (req, res) => {
         }
 
         // Delete the relationships in the CategoryPost collection
-        await CategoryPost.deleteMany({post: id});
+        await CategoryPost.deleteMany({postId: id});
+
+        // Delete the relationships in the TagPost collection
+        await TagPost.deleteMany({postId: id});
+
+        // Delete the relationships in the TagPost collection
+        await Comment.deleteMany({commentable: id});
 
         res.status(200).json({status: true, message: 'Post deleted'});
     } catch (err) {

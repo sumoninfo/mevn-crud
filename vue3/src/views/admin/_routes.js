@@ -24,6 +24,14 @@ const AdminRoutes = [
         }
     },
     {
+        path: '/tag',
+        name: 'AdminTag',
+        component: () => import('./pages/tag/Index.vue'),
+        meta: {
+            title: 'Admin Tag'
+        }
+    },
+    {
         path: '/post',
         name: 'AdminPost',
         component: () => import('./pages/post/Index.vue'),
@@ -45,6 +53,14 @@ const AdminRoutes = [
         component: () => import('./pages/post/Create.vue'),
         meta: {
             title: 'Edit Post'
+        }
+    },
+    {
+        path: '/post/:postId/show',
+        name: 'ShowPost',
+        component: () => import('./pages/post/Show.vue'),
+        meta: {
+            title: 'Show Post'
         }
     }
 ];

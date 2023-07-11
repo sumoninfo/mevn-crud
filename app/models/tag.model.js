@@ -1,5 +1,5 @@
 const {Schema, model} = require('mongoose');
-const categorySchema = new Schema({
+const tagSchema = new Schema({
     title: String,
     status: {
         type: String,
@@ -9,13 +9,13 @@ const categorySchema = new Schema({
     toJSON: {virtuals: true}
 });
 
-categorySchema.virtual('posts', {
-    ref: 'CategoryPost',
+tagSchema.virtual('posts', {
+    ref: 'PostTag',
     localField: '_id',
-    foreignField: 'categoryId'
+    foreignField: 'tagId'
 });
 
 
-const Category = model('Category', categorySchema);
+const Tag = model('Tag', tagSchema);
 
-module.exports = Category
+module.exports = Tag

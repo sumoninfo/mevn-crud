@@ -21,6 +21,12 @@
           </router-link>
         </li>
         <li class="nav-item">
+          <router-link :to="{name:'AdminTag'}" class="nav-link">
+            <i class="fas fa-home"></i>
+            Tag
+          </router-link>
+        </li>
+        <li class="nav-item">
           <router-link :to="{name:'AdminPost'}" class="nav-link">
             <i class="fas fa-home"></i>
             Post

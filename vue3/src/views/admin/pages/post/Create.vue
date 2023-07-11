@@ -37,6 +37,12 @@
                   </select>
                 </div>
                 <div class="mb-3">
+                  <label for="tags_ids" class="form-label">Tags</label>
+                  <select multiple id="tags_ids" v-model="formData.tags_ids" class="form-control">
+                    <option v-for="tag in tags" :value="tag._id">{{ tag.title }}</option>
+                  </select>
+                </div>
+                <div class="mb-3">
                   <label for="status" class="form-label">Status</label>
                   <select id="status" v-model="formData.status" class="form-control">
                     <option value="active">Active</option>
@@ -67,12 +73,15 @@ import handlePost from "@/composables/post";
 import handleAuthor from "@/composables/author";
 import {useRoute, useRouter} from "vue-router";
 import handleCategory from "@/composables/category";
+import handleTag from "@/composables/tag";
 
 const {fetchPost, storePost, updatePost} = handlePost();
 const {fetchAuthors} = handleAuthor();
 const {fetchCategories} = handleCategory();
+const {fetchTags} = handleTag();
 const authors = ref([])
 const categories = ref([])
+const tags = ref([])
 const isEdit = ref(false)
 const router = useRouter()
 const route = useRoute()
@@ -81,6 +90,7 @@ const formData = ref({
   content: "",
   author_id: "",
   categories_ids: [],
+  tags_ids: [],
   status: "",
   comment: ""
 })
@@ -100,10 +110,26 @@ const getCategories = () => {
     NotificationService.error(error.response.data.message);
   })
 }
+
+const getTags = () => {
+  fetchTags().then(({data}) => {
+    tags.value = data.data
+  }).catch(error => {
+    NotificationService.error(error.response.data.message);
+  })
+}
 const getPost = (id) => {
   fetchPost(id).then(({data}) => {
     formData.value = data.data
     formData.value.author_id = data.data.author._id
+    formData.value.comment = data.data.comments[0].body
+    formData.value.categories_ids = data.data.categories.map((category, index) => {
+      return category.categoryId._id
+    })
+    formData.value.tags_ids = data.data.tags.map((tag, index) => {
+      return tag.tagId._id
+    })
+
   }).catch(error => {
     NotificationService.error(error.response.data.message);
   })
@@ -133,6 +159,7 @@ const formReset = () => {
 onMounted(() => {
   getAuthors()
   getCategories()
+  getTags()
 
   if (route.params.postId) {
     isEdit.value = true;

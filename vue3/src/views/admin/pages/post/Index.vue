@@ -33,6 +33,10 @@
                   <td>{{ list.content }}</td>
                   <td>{{ $filters.upperCase(list.status) }}</td>
                   <td>
+                    <router-link :to="{name:'ShowPost', params:{postId:list._id}}">
+                      <i class="fa fa-eye"></i> Show
+                    </router-link>
+                    |
                     <router-link :to="{name:'EditPost', params:{postId:list._id}}">
                       <i class="fa fa-edit blue"></i> Edit
                     </router-link>
