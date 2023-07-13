@@ -3,13 +3,17 @@
     <div class="row mt-5">
       <div class="col-md-12">
         <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Author Table</h3>
-            <div class="card-tools">
-              <button id="openModal" type="button" class="btn btn-primary" data-bs-toggle="modal"
-                      data-bs-target="#authorModal">
-                Add new
-              </button>
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <h5 class="card-title">Card Header Title</h5>
+            <div class="d-flex align-items-center">
+              <div class="input-group me-2">
+                <input v-model="table.search" type="text" class="form-control" placeholder="Search...">
+                <button @click="getList" class="btn btn-outline-secondary" type="button">Search</button>
+                <button id="openModal" type="button" class="btn btn-primary ms-4" data-bs-toggle="modal"
+                        data-bs-target="#authorModal">
+                  Add new
+                </button>
+              </div>
             </div>
           </div>
 
@@ -20,6 +24,7 @@
                 <th>#</th>
                 <th>Title</th>
                 <th>Status</th>
+                <th>Posts count</th>
                 <th>Action</th>
               </tr>
               <template v-if="lists.length">
@@ -27,6 +32,7 @@
                   <td>{{ table.pagination.from + index }}</td>
                   <td>{{ list.title }}</td>
                   <td>{{ $filters.upperCase(list.status) }}</td>
+                  <td>{{ list.postCount }}</td>
                   <td>
                     <a href="#" data-id="customers.id" @click="editModalWindow(list)">
                       <i class="fa fa-edit blue"></i> Edit
@@ -107,6 +113,7 @@ const formData = ref({
   content: "",
   status: ""
 })
+
 const table = ref({
   search: '',
   pagination: {

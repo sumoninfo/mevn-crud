@@ -18,6 +18,13 @@ const authorSchema = new Schema({
     toJSON: {virtuals: true}
 });
 
+// one-to-many relation with posts
+authorSchema.virtual('posts', {
+    ref: 'Post',
+    localField: '_id',
+    foreignField: 'author'
+});
+
 authorSchema.plugin(mongoosePaginate);
 const Author = model('Author', authorSchema);
 
