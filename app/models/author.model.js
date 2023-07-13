@@ -14,6 +14,7 @@ const authorSchema = new Schema({
         },
         default: 'active'
     },
+    image: String,
 }, {
     toJSON: {virtuals: true}
 });

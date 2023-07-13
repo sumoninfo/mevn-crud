@@ -9,7 +9,7 @@
               <div class="input-group me-2">
                 <input v-model="table.search" type="text" class="form-control" placeholder="Search...">
                 <button @click="getList" class="btn btn-outline-secondary" type="button">Search</button>
-                <button id="openModal" type="button" class="btn btn-primary ms-4" data-bs-toggle="modal"
+                <button @click="formReset" id="openModal" type="button" class="btn btn-primary ms-4" data-bs-toggle="modal"
                         data-bs-target="#categoryModal">
                   Add new
                 </button>

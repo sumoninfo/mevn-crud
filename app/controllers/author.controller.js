@@ -1,4 +1,7 @@
 const db = require("../models");
+const fs = require('fs');
+const multer = require('multer');
+const upload = require("../helper/upload.helper");
 const Author = db.author;
 const handleError = (res, statusCode, message) => {
     res.status(statusCode).json({status: false, message});
@@ -19,12 +22,12 @@ exports.index = async (req, res) => {
     const options = {
         page: reqPage,
         limit: pageSize,
-        sort: { title: -1 } // Sort by the 'title' column in descending order
+        sort: {title: -1} // Sort by the 'title' column in descending order
     };
 
     try {
         const pipeline = [
-            { $match: query },
+            {$match: query},
             {
                 $lookup: {
                     from: 'posts',
@@ -35,7 +38,7 @@ exports.index = async (req, res) => {
             },
             {
                 $addFields: {
-                    postCount: { $size: '$posts' }
+                    postCount: {$size: '$posts'}
                 }
             },
             {
@@ -52,19 +55,21 @@ exports.index = async (req, res) => {
                     _id: 1,
                     title: 1,
                     status: 1,
+                    image: 1,
                     postCount: 1
                 }
             }
         ];
 
-        const [updatedDocs, [{ count }]] = await Promise.all([
+        const [updatedDocs, countResult] = await Promise.all([
             Author.aggregate(pipeline),
             Author.aggregate([
-                { $match: query },
-                { $count: 'count' }
+                {$match: query},
+                {$group: {_id: null, count: {$sum: 1}}}
             ])
         ]);
 
+        const count = countResult.length > 0 ? countResult[0].count : 0;
         const total = count || 0;
         const pages = Math.ceil(total / options.limit);
 
@@ -92,12 +97,28 @@ exports.index = async (req, res) => {
 };
 
 exports.store = async (req, res) => {
-    const data = req.body;
-    const model = new Author(data);
-
     try {
-        const author = await model.save();
-        res.status(200).json({status: true, message: 'Author Created!', data: author});
+        upload.single('image')(req, res, async function (err) {
+            if (err instanceof multer.MulterError) {
+                // Handle Multer errors
+                console.error(err);
+                handleError(res, 400, err.message);
+            } else if (err) {
+                // Handle other errors
+                console.error(err);
+                handleError(res, 500, err.message);
+            } else {
+                // No error, proceed with creating the author
+
+                const data = req.body;
+                data.image = req.file ? req.file.path : ''; // Add the image path to the data object
+
+                const model = new Author(data);
+                const author = await model.save();
+
+                res.status(200).json({status: true, message: 'Author Created!', data: author});
+            }
+        });
     } catch (err) {
         console.error(err);
         handleError(res, 500, err);
@@ -126,14 +147,41 @@ exports.update = async (req, res) => {
     const data = req.body;
 
     try {
-        const author = await Author.findByIdAndUpdate(id, data, {new: true, runValidators: true});
+        const author = await Author.findById(id);
 
         if (!author) {
             handleError(res, 404, 'Author not found');
             return;
         }
 
-        res.status(200).json({status: true, message: 'Author updated', data: author});
+        let imagePath = author.image; // Store the old image path
+
+        upload.single('image')(req, res, async function (err) {
+            if (err instanceof multer.MulterError) {
+                // Handle Multer errors
+                console.error(err);
+                handleError(res, 400, err.message);
+            } else if (err) {
+                // Handle other errors
+                console.error(err);
+                handleError(res, 500, err.message);
+            } else {
+                // No error, proceed with updating the author
+
+                if (req.file) {
+                    // Delete the old image if it exists
+                    if (imagePath && fs.existsSync(imagePath)) {
+                        fs.unlinkSync(imagePath);
+                    }
+
+                    data.image = req.file.path; // Update the image path in the data object
+                }
+
+                const updatedAuthor = await Author.findByIdAndUpdate(id, data, {new: true, runValidators: true});
+
+                res.status(200).json({status: true, message: 'Author updated', data: updatedAuthor});
+            }
+        });
     } catch (err) {
         if (err.name === 'ValidationError') {
             res.status(400).json({status: false, message: 'Validation error', errors: err.errors});
@@ -149,6 +197,11 @@ exports.delete = async (req, res) => {
 
     try {
         const author = await Author.findByIdAndDelete(id);
+
+        let imagePath = author.image; // Store the old image path
+        if (imagePath && fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
 
         if (!author) {
             handleError(res, 404, 'Author not found');

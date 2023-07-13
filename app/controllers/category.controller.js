@@ -57,14 +57,15 @@ exports.index = async (req, res) => {
             }
         ];
 
-        const [updatedDocs, [{count}]] = await Promise.all([
+        const [updatedDocs, countResult] = await Promise.all([
             Category.aggregate(pipeline),
             Category.aggregate([
-                {$match: query},
-                {$count: 'count'}
+                { $match: query },
+                { $group: { _id: null, count: { $sum: 1 } } }
             ])
         ]);
 
+        const count = countResult.length > 0 ? countResult[0].count : 0;
         const total = count || 0;
         const pages = Math.ceil(total / options.limit);
 

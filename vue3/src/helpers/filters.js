@@ -12,6 +12,12 @@ const filters = {
             return "";
         }
         return moment(date).format('lll');
+    },
+    getImage(image) {
+        if (image === '') {
+            return "";
+        }
+        return `${process.env.VUE_APP_API_URL}/${image}`
     }
 }
 export default filters;

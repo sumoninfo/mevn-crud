@@ -41,7 +41,7 @@ var corsOptions = {
     origin: "http://localhost:8080",
     // origin: "http://localhost:8081"
 };
-
+app.use('/uploads', express.static('uploads'));
 app.use(cors(corsOptions));
 
 // parse requests of content-type - application/json

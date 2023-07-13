@@ -23,6 +23,7 @@
               <tr>
                 <th>#</th>
                 <th>Title</th>
+                <th>Image</th>
                 <th>Status</th>
                 <th>Posts count</th>
                 <th>Action</th>
@@ -31,6 +32,7 @@
                 <tr v-for="(list, index) in lists" :key="list.id">
                   <td>{{ table.pagination.from + index }}</td>
                   <td>{{ list.title }}</td>
+                  <td><img width="100" :src="$filters.getImage(list.image)"></td>
                   <td>{{ $filters.upperCase(list.status) }}</td>
                   <td>{{ list.postCount }}</td>
                   <td>
@@ -86,6 +88,11 @@
                 {{ errors['status'].message }}
               </div>
             </div>
+
+            <div class="mb-3">
+              <label for="status" class="form-label">File</label>
+              <input type="file" @change="handleFileChange" accept="image/*">
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -111,7 +118,8 @@ const errors = ref([])
 const formData = ref({
   title: "",
   content: "",
-  status: ""
+  status: "",
+  file: ''
 })
 
 const table = ref({
@@ -121,6 +129,9 @@ const table = ref({
     per_page: 10,
   }
 })
+const handleFileChange = (event) => {
+  formData.value.file = event.target.files[0];
+}
 
 const getList = () => {
   let params = {
@@ -137,7 +148,12 @@ const getList = () => {
 }
 
 const saveUpdateAuthor = () => {
-  const res = isEdit.value ? updateAuthor(formData.value._id, formData.value) : storeAuthor(formData.value)
+  const appendData = new FormData();
+  appendData.append('title', formData.value.title);
+  appendData.append('status', formData.value.status);
+  appendData.append('image', formData.value.file);
+
+  const res = isEdit.value ? updateAuthor(formData.value._id, appendData) : storeAuthor(appendData)
   res.then(({data}) => {
     errors.value = []
     getList()
@@ -171,7 +187,7 @@ const formReset = () => {
     title: "",
     content: "",
     status: "",
-    date: "",
+    file: ''
   }
 }
 
