@@ -12,9 +12,19 @@ exports.index = async (req, res) => {
     const reqPage = parseInt(req.query.page) || 1;  // Current page number
     const pageSize = parseInt(req.query.per_page) || 10;  // Number of items per page
 
+    const searchTerm = req.query.search || '';  // Number of items per page
+
+    const query = {
+        title: {
+            $regex: searchTerm,
+            $options: 'i'
+        }
+    };
+
     const options = {
         page: reqPage,
         limit: pageSize,
+        sort: { title: -1 }, // Sort by the 'title' column in descending order
         populate: [
             {
                 path: 'author',
@@ -46,7 +56,7 @@ exports.index = async (req, res) => {
     };
 
     try {
-        const result = await Post.paginate({}, options);
+        const result = await Post.paginate(query, options);
 
         const {docs, total, limit, page, pages} = result;
         // Prepare the meta keys

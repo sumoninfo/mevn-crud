@@ -7,7 +7,7 @@ const handleError = (res, statusCode, message) => {
 exports.index = async (req, res) => {
     const reqPage = parseInt(req.query.page) || 1;  // Current page number
     const pageSize = parseInt(req.query.per_page) || 10;  // Number of items per page
-    const searchTerm = req.query.search;  // Number of items per page
+    const searchTerm = req.query.search || '';  // Number of items per page
 
     const query = {
         title: {

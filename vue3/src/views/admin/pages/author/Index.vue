@@ -4,7 +4,7 @@
       <div class="col-md-12">
         <div class="card">
           <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="card-title">Card Header Title</h5>
+            <h5 class="card-title">Authors list</h5>
             <div class="d-flex align-items-center">
               <div class="input-group me-2">
                 <input v-model="table.search" type="text" class="form-control" placeholder="Search...">

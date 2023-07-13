@@ -7,23 +7,81 @@ const handleError = (res, statusCode, message) => {
 exports.index = async (req, res) => {
     const reqPage = parseInt(req.query.page) || 1;  // Current page number
     const pageSize = parseInt(req.query.per_page) || 10;  // Number of items per page
+    const searchTerm = req.query.search || '';  // Number of items per page
+
+    const query = {
+        title: {
+            $regex: searchTerm,
+            $options: 'i'
+        }
+    };
+
+    const options = {
+        page: reqPage,
+        limit: pageSize,
+        sort: {title: -1} // Sort by the 'title' column in descending order
+    };
 
     try {
-        const result = await Category.paginate({}, {page: reqPage, limit: pageSize});
-        const {docs, total, limit, page, pages} = result;
-        // Prepare the meta keys
+        const pipeline = [
+            {$match: query},
+            {
+                $lookup: {
+                    from: 'categoryposts',
+                    localField: '_id',
+                    foreignField: 'categoryId',
+                    as: 'posts'
+                }
+            },
+            {
+                $addFields: {
+                    postCount: {$size: '$posts'}
+                }
+            },
+            {
+                $sort: options.sort
+            },
+            {
+                $skip: (options.page - 1) * options.limit
+            },
+            {
+                $limit: options.limit
+            },
+            {
+                $project: {
+                    _id: 1,
+                    title: 1,
+                    status: 1,
+                    postCount: 1
+                }
+            }
+        ];
+
+        const [updatedDocs, [{count}]] = await Promise.all([
+            Category.aggregate(pipeline),
+            Category.aggregate([
+                {$match: query},
+                {$count: 'count'}
+            ])
+        ]);
+
+        const total = count || 0;
+        const pages = Math.ceil(total / options.limit);
+
         const paginationMeta = {
-            from: (page - 1) * limit + 1,
-            to: (page - 1) * limit + docs.length,
-            current_page: page,
-            per_page: limit,
+            from: (options.page - 1) * options.limit + 1,
+            to: (options.page - 1) * options.limit + updatedDocs.length,
+            current_page: options.page,
+            per_page: options.limit,
             total: total,
             last_page: pages
         };
 
         res.status(200).json({
-            status: true, message: 'Categories Fetched!', data: {
-                data: docs,
+            status: true,
+            message: 'Categories Fetched!',
+            data: {
+                data: updatedDocs,
                 meta: paginationMeta
             }
         });

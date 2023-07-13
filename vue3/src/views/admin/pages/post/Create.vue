@@ -6,9 +6,9 @@
           <div class="card-header">
             <h3 class="card-title">Posts Create</h3>
             <div class="card-tools">
-              <button type="button" class="btn btn-primary">
+              <router-link :to="{name:'AdminPost'}" class="btn btn-primary">
                 Back
-              </button>
+              </router-link>
             </div>
           </div>
 
@@ -83,7 +83,9 @@
                 </div>
               </div>
               <div class="">
-                <button type="button" class="btn btn-secondary m-2" data-bs-dismiss="modal">Close</button>
+                <router-link :to="{name:'AdminPost'}" class="btn btn-secondary m-2">
+                  Close
+                </router-link>
                 <button type="submit" class="btn btn-primary">{{ isEdit ? "Update" : "Save" }}</button>
               </div>
             </form>
@@ -112,6 +114,7 @@ const authors = ref([])
 const categories = ref([])
 const tags = ref([])
 const isEdit = ref(false)
+const loader = ref(false)
 const router = useRouter()
 const route = useRoute()
 const formData = ref({
@@ -123,30 +126,6 @@ const formData = ref({
   status: "",
   comment: ""
 })
-
-const getAuthors = () => {
-  fetchAuthors().then(({data}) => {
-    authors.value = data.data
-  }).catch(error => {
-    NotificationService.error(error.response.data.message);
-  })
-}
-
-const getCategories = () => {
-  fetchCategories().then(({data}) => {
-    categories.value = data.data
-  }).catch(error => {
-    NotificationService.error(error.response.data.message);
-  })
-}
-
-const getTags = () => {
-  fetchTags().then(({data}) => {
-    tags.value = data.data
-  }).catch(error => {
-    NotificationService.error(error.response.data.message);
-  })
-}
 const getPost = (id) => {
   fetchPost(id).then(({data}) => {
     formData.value = data.data
@@ -190,10 +169,26 @@ const formReset = () => {
   }
 }
 
-onMounted(() => {
-  getAuthors()
-  getCategories()
-  getTags()
+onMounted(async () => {
+  loader.value = true
+  const authorRes = fetchAuthors()
+  const categoryRes = fetchCategories()
+  const tagRes = fetchTags()
+  Promise.all([
+    authorRes.then(({data}) => {
+      if (data.data) authors.value = data.data.data
+    }),
+    categoryRes.then(({data}) => {
+      if (data.data) categories.value = data.data.data
+    }),
+    tagRes.then(({data}) => {
+      if (data.data) tags.value = data.data.data
+    }),
+  ]).then(() => {
+    loader.value = false
+  }).catch((err) => {
+    loader.value = false
+  })
 
   if (route.params.postId) {
     isEdit.value = true;

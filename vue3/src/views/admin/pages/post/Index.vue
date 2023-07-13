@@ -3,12 +3,16 @@
     <div class="row mt-5">
       <div class="col-md-12">
         <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Posts Table</h3>
-            <div class="card-tools">
-              <router-link :to="{name:'CreatePost'}" class="btn btn-primary">
-                Add new
-              </router-link>
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <h5 class="card-title">Posts list</h5>
+            <div class="d-flex align-items-center">
+              <div class="input-group me-2">
+                <input v-model="table.search" type="text" class="form-control" placeholder="Search...">
+                <button @click="getList" class="btn btn-outline-secondary" type="button">Search</button>
+                <router-link :to="{name:'CreatePost'}" class="btn btn-primary ms-4">
+                  Add new
+                </router-link>
+              </div>
             </div>
           </div>
 
@@ -22,6 +26,9 @@
                 <th>Date</th>
                 <th>Content</th>
                 <th>Status</th>
+                <th>Categories</th>
+                <th>Tags</th>
+                <th>Comments</th>
                 <th>Action</th>
               </tr>
               <template v-if="lists.length">
@@ -32,17 +39,20 @@
                   <td>{{ $filters.dateFormat(list.date) }}</td>
                   <td>{{ list.content }}</td>
                   <td>{{ $filters.upperCase(list.status) }}</td>
+                  <td>{{ list.categories.length }}</td>
+                  <td>{{ list.tags.length }}</td>
+                  <td>{{ list.comments.length }}</td>
                   <td>
                     <router-link :to="{name:'ShowPost', params:{postId:list._id}}">
-                      <i class="fa fa-eye"></i> Show
+                      <i class="fa fa-eye"></i>
                     </router-link>
                     |
                     <router-link :to="{name:'EditPost', params:{postId:list._id}}">
-                      <i class="fa fa-edit blue"></i> Edit
+                      <i class="fa fa-edit blue"></i>
                     </router-link>
                     |
                     <a href="#" @click="postDelete(list._id)">
-                      <i class="fa fa-trash red"></i> Delete
+                      <i class="fa fa-trash red"></i>
                     </a>
                   </td>
                 </tr>

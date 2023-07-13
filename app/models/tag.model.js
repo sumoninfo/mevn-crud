@@ -15,7 +15,7 @@ const tagSchema = new Schema({
 });
 
 tagSchema.virtual('posts', {
-    ref: 'PostTag',
+    ref: 'TagPost',
     localField: '_id',
     foreignField: 'tagId'
 });
